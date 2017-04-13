@@ -1,0 +1,12 @@
+.register {
+    height: 300px;
+    width: 200px;
+    background-color: lightblue;
+}
+
+.confirm {
+    height: 300px;
+    width: 200px;
+    background-color: lightblue;
+    display: inline-block;
+}
