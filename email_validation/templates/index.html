@@ -1,0 +1,19 @@
+<html>
+<head>
+  <title>Email</title>
+</head>
+<body>
+  <hr>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p>{{message}}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+  <form action='/new' method='POST'>
+    <label for="email">Email address:<input type="text" name="email" id="email"></label>
+    <input type="submit" value="Submit">
+  </form>
+</body>
+</html>
