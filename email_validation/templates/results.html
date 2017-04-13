@@ -1,8 +1,10 @@
 <html>
 <head>
   <title>Emails</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <div class="flash">
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for message in messages %}
@@ -10,6 +12,7 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
+    </div>
     <h1>Email Addresses Entered:</h1>
   <table>
     <thead>
