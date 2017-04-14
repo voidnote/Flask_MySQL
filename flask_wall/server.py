@@ -6,7 +6,7 @@ import os, binascii, md5, re
 app = Flask(__name__)
 app.secret_key = "ThisIsSecret"
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
-mysql = MySQLConnector(app,"login_registration")
+mysql = MySQLConnector(app,"flask_wall")
 
 @app.route("/")
 def index():
@@ -36,10 +36,10 @@ def process():
   query = "SELECT * FROM users WHERE users.email = :email LIMIT 1"
   data = {'email': request.form['email']}
   user = mysql.query_db(query, data)
-  if request.form["email"] == user[0]["email"]:
+  if user:
     flash("This email is already registered. Please login instead.")
     errors += 1
-  
+
   if errors > 0:
     return redirect("/")
 
@@ -49,13 +49,13 @@ def process():
   encrypted_pw = md5.new(password + salt).hexdigest()
 
   # submit data to the DB
-  query = "INSERT INTO users (first_name, last_name, email, password, salt, created_at, updated_at) VALUES (:first_name, :last_name, :email, :password, :salt, NOW(), NOW())"
+  query = "INSERT INTO users (first_name, last_name, email, password, created_at, updated_at, salt) VALUES (:first_name, :last_name, :email, :password, NOW(), NOW(), :salt)"
   data = {
         "first_name": request.form["first_name"],
         "last_name": request.form["last_name"], 
         "email": request.form["email"],
-        "salt":  salt,
-        "password": encrypted_pw
+        "password": encrypted_pw,
+        "salt":  salt
           }
   mysql.query_db(query, data)
 
@@ -65,7 +65,7 @@ def process():
   query = "SELECT * FROM users WHERE users.email = :email LIMIT 1"
   data = {'email': request.form["email"]}
   user = mysql.query_db(query, data)
-  session["user_id"] = user[0]["email"]
+  session["user_id"] = user[0]["id"]
 
   flash("Thank you ")
   flash(session["first_name"])
@@ -106,7 +106,7 @@ def login():
       query = "SELECT * FROM users WHERE users.email = :email LIMIT 1"
       data = {'email': request.form["email"]}
       user = mysql.query_db(query, data)
-      session["user_id"] = user[0]["email"]
+      session["user_id"] = user[0]["id"]
       
       return redirect("/show")
     else:
@@ -119,7 +119,15 @@ def login():
 @app.route("/show")
 def show():
   if "user_id" in session:
-    return render_template("show.html")
+    
+    query1 = "SELECT messages.id, CONCAT(first_name , ' ', last_name) as name, message, DATE_FORMAT(messages.created_at, '%M %D %Y') as date FROM messages JOIN users ON messages.user_id = users.id"
+    messages = mysql.query_db(query1)
+
+    query2 = "SELECT comments.id, comments.message_id, CONCAT(first_name , ' ', last_name) as name, comments, DATE_FORMAT(comments.created_at, '%M %D %Y') as date FROM comments JOIN users ON comments.user_id = users.id JOIN messages ON messages.id = comments.message_id"
+    comments = mysql.query_db(query2)
+
+    return render_template("show.html", all_messages = messages, all_comments = comments)
+
   else:
     return redirect("/")
 
@@ -128,5 +136,25 @@ def logout():
   session.clear()
   return redirect("/")
 
+@app.route("/postpost", methods=["POST"])
+def postpost():
+  query = "INSERT INTO messages (message, created_at, updated_at, user_id) VALUES (:message, NOW(), NOW(), :user_id)"
+  data = {
+      "message": request.form["postpost"],
+      "user_id": session["user_id"]
+        }
+  mysql.query_db(query, data)
+  return redirect("/show")
+
+@app.route("/commoncomment", methods=["POST"])
+def commoncomment():
+  query = "INSERT INTO comments (comments, created_at, updated_at, user_id, message_id) VALUES (:comment, NOW(), NOW(), :user_id, :message_id)"
+  data = {
+      "comment": request.form["commoncomment"],
+      "user_id": session["user_id"],
+      "message_id": request.form["message_id"]
+        }
+  mysql.query_db(query, data)
+  return redirect("/show")
 
 app.run(debug=True)

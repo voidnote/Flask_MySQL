@@ -1,0 +1,46 @@
+.prettybox {
+    height: 300px;
+    width: 200px;
+    background-color: lightblue;
+    display: inline-block;
+    margin: 40px 0px 20px 0px;
+    vertical-align: top;
+}
+
+.confirm {
+    height: 40px;
+    width: 800px;
+    background-color: lightblue;
+    display: inline-block;
+}
+
+ul {
+    list-style: none;
+    display: inline-block;
+}
+
+li {
+    display: inline-block;
+}
+
+textarea {
+    height: 100px;
+    width: 500px;
+}
+
+.messagestuff{
+    width: 200px;
+    background-color: blue;
+    color: white;
+}
+.commentstuff{
+    width: 200px;
+    background-color: blue;
+    color: white;
+}
+#commentarea {
+    height: 30px;
+}
+.postings{
+    background-color: lightblue;
+}

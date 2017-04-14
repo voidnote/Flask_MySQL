@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        <title>Success Page</title>
+    </head>
+    <body>
+        <div class="header">
+            <ul>
+                <li><h2>Coding Dojo Wall</h2></li>
+                <li><h4>Welcome {{session["first_name"]}}</h4></li>
+                <li><td><form action='/logout' method='post'><input type='Submit' value='logout'></form></td></li>
+            </ul>
+        </div>
+        <hr>
+        <div class="confirm">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                    <p>{{message}}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        <div class="message">
+            <form action='/postpost' method='post'>
+                <label for="last_name">Post a Message:</label><br>
+                <textarea name="postpost"></textarea>
+                <input type='Submit' value='Post a message'>
+            </form>
+        </div>
+        <div class="postings">
+        {% for row in all_messages: %}
+            <p>{{ row["name"]}}, {{ row["date"]}}</p>
+            <p>{{ row["message"]}}</p>
+            <div class="commentstuff">
+                {% for row_c in all_comments: %}
+                    {% if row_c["message_id"] == row["id"] %}
+                    <p>{{row_c["name"]}}, {{ row_c["date"]}}</p>
+                    <p class="commentstuff">{{ row_c["comments"]}}</p>
+                    <input type="hidden" value='{{row_c["id"]}}' name="comment_id">
+                    {% endif %}
+                {% endfor %}
+                <form action='/commoncomment' method='post'><br>
+                    <textarea name="commoncomment" id="commentarea"></textarea>
+                    <input type="hidden" value='{{row["id"]}}' name="message_id">
+                    <input type='Submit' value='Post a comment'>
+                </form>
+            </div>
+        {% endfor %}
+        </div>
+    </body>
+</html>
